@@ -14,7 +14,7 @@ import styles from "./Login.module.scss";
 export const Login = () => {
   const isRegister = useSelector(selectIsAuth);
   const dispatch = useDispatch();
-  const { register, handleSubmit, setError, formState: {errors, isValid}
+  const { register, handleSubmit, formState: {errors, isValid}
 } = useForm({
     defaultValues: {
       email: 'larinv1@mail.ru',
