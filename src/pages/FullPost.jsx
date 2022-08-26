@@ -5,11 +5,11 @@ import axios from '../axios';
 import { Post } from "../components/Post";
 import { Index } from "../components/AddComment";
 import { CommentsBlock } from "../components/CommentsBlock";
+import ReactMarkdown from 'react-markdown';
 
 export const FullPost = () => {
   const [data, setData] = React.useState();
   const [isLoading, setLoading] = React.useState(true);
-
   const {id} = useParams();
 
   React.useEffect(() => {
@@ -33,16 +33,15 @@ export const FullPost = () => {
       <Post
         id={data._id}
         title={data.title}
-        imageUrl={data.imageUrl}
+        imageUrl={`http://localhost:7777${data.imageUrl}`}
         user={data.user}
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
         commentsCount={3}
         tags={data.tags}
-        isFullPost
-      >
+        isFullPost>
         <p>
-          {data.text}
+          <ReactMarkdown children={data.text} />
         </p>
       </Post>
       <CommentsBlock
