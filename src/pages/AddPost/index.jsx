@@ -5,22 +5,22 @@ import Button from '@mui/material/Button';
 import SimpleMDE from 'react-simplemde-editor';
 import {selectIsAuth} from '../../redux/slices/auth';
 import {useSelector} from 'react-redux';
-import {Navigate, useNavigate} from 'react-router-dom';
+import {Navigate, useNavigate, useParams} from 'react-router-dom';
 import axios from '../../axios';
 
 import 'easymde/dist/easymde.min.css';
 import styles from './AddPost.module.scss';
 
 export const AddPost = () => {
+  const {id} = useParams();
   const navigate = useNavigate(); 
   const isRegister = useSelector(selectIsAuth);
   const [text, setText] = React.useState('');
   const [title, setTitle] = React.useState('');
   const [tags, setTags] = React.useState('');
-  const [imageUrl, setimageUrl] = React.useState('');
+  const [imageUrl, setImageUrl] = React.useState('');
   const [Loading, setLoading] = React.useState(false);
-
-
+  const isEdit= Boolean(id);
   const FileRef = React.useRef(null);
 
   const handleChangeFile = async (event) => {
@@ -29,7 +29,7 @@ export const AddPost = () => {
       const file = event.target.files[0];
       formData.append('image', file);
       const {data} = await axios.post('/uploads', formData);
-      setimageUrl(data.url);
+      setImageUrl(data.url);
       console.log(data);
     } catch(err){
       console.warn(err);
@@ -38,12 +38,23 @@ export const AddPost = () => {
   };
 
   const onClickRemoveImage = () => {
-    setimageUrl('');
+    setImageUrl('');
   };
 
   const onChange = React.useCallback((value) => {
     setText(value);
   }, []);
+
+  React.useEffect(() => {
+  if (id) {
+    axios.get(`/articles/${id}`).then(({data}) => {
+      setTitle(data.title);
+      setText(data.text);
+      setImageUrl(data.imageUrl);
+      setTags(data.tags.join(','));
+    });
+  }
+}, []);
 
   const options = React.useMemo(
     () => ({
@@ -75,18 +86,19 @@ const onSubmit = async () => {
     const fields = {
       title,
       imageUrl,
-      tags: tags.split(','),
+      tags,
       text,
     };
-    const {data} = await axios.post('/articles', fields);
-    const id = data._id;
-    navigate(`/articles/${id}`);
+    const {data} = isEdit ? await axios.patch(`/articles/${id}`, fields)
+     : await axios.post('/articles', fields);
+
+    const _id =  isEdit ? id : data._id;
+    navigate(`/articles/${_id}`);
   } catch (err) {
     console.warn(err);
     alert('ОШИБКА ПРИ СОЗДАНИИ СТАТЬИ!');
   }
 };
-
 
   return (
     <Paper style={{ padding: 30 }}>
@@ -123,7 +135,7 @@ const onSubmit = async () => {
       <SimpleMDE className={styles.editor} value={text} onChange={onChange} options={options} />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Опубликовать
+        {isEdit ? 'Сохранить' : ' Опубликовать'}
         </Button>
         <a href="/">
           <Button size="large">Отмена</Button>

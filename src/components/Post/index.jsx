@@ -1,6 +1,9 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Link } from "react-router-dom";
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchRemoveArticles} from '../../redux/slices/articles';
+
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Clear';
 import EditIcon from '@mui/icons-material/Edit';
@@ -25,11 +28,16 @@ export const Post = ({
   isLoading,
   isEditable,
 }) => {
+  const dispatch = useDispatch();
   if (isLoading) {
     return <PostSkeleton />;
   }
 
-  const onClickRemove = () => {};
+  const onClickRemove = () => {
+     if (window.confirm('ВЫ ДЕЙСТВИТЕЛЬНО ХОТИТЕ УДАЛИТЬ СТАТЬЮ?')) {
+          dispatch(fetchRemoveArticles(_id));
+    }
+  };
 
   return (
     <div className={clsx(styles.root, { [styles.rootFull]: isFullPost })}>
